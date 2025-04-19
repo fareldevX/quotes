@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+    <title>Picture Quotes</title>
+</head>
+<style>
+    #result {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+    }
+    #quote {
+        font-size: 1.7em;
+        text-align: center;
+        margin: 0;
+    }
+    #author {
+        display: none;
+        background-color: #007AFF;
+        color: white;
+        font-size: 1.2em;
+        padding: 8px 16px;
+        text-align: center;
+    }
+</style>
+<body>
+    <ons-page>
+        <ons-toolbar>
+            <div class="center">Picture Quotes</div>
+            <div class="right">
+                <ons-toolbar-button>
+                    <a download id="screenshot">📸</a>
+                </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+
+        <div id="result">
+            <h2 id="quote"></h2>
+            <p id="author"></p>
+        </div>
+
+        <ons-fab position="bottom right" onclick="generateIdea()">
+            <ons-icon icon="md-plus"></ons-icon>
+        </ons-fab>
+
+    </ons-page>
+
+    <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        async function generateIdea() {
+            const url = "https://qapi.vercel.app/api/random";
+            const response = await fetch(url);
+            const api = await response.json()
+            
+            const result = document.getElementById("result");
+            const quote = document.getElementById("quote");
+            const author = document.getElementById("author");
+            const screenshot = document.getElementById("screenshot");
+            
+            api.quote = api.quote.replace(/\\n/g, "<br>");
+            api.author = api.author.replace(/\\n/g, "<br>");
+
+            quote.innerHTML = api.quote;
+            author.innerHTML = api.author;
+            
+            author.style.display = "block";
+
+            let count = 0;
+
+            screenshot.addEventListener("click", () => {
+                count ? window.location.reload() : screenshot.textContent = "📸";
+
+                html2canvas(result).then(callback => {
+                    screenshot.setAttribute("href", callback.toDataURL("image/png"));
+                    screenshot.setAttribute("download", `${api.author} Quotes.png`);
+                    screenshot.textContent = "📥";
+                    count = 1;
+                })
+            })
+        }
+    </script>
+</body>
+</html>
